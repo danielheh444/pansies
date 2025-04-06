@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicNow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: black;
+        }
+
+        nav a {
+            margin-left: 30px;
+            text-decoration: none;
+            color: black;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .news-card {
+            text-decoration: none;
+            color: black;
+        }
+
+        .news-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .news-card h2 {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .news-card p {
+            color: #666;
+            font-size: 16px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">MusicNow</a>
+        <nav>
+            <a href="/news">Новости</a>
+            <a href="/albums">Альбомы</a>
+            <a href="/clips">Клипы</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Последние новости</h1>
+
+        <div class="news-grid">
+            <a href="#" class="news-card">
+                <img src="https://via.placeholder.com/400x300" alt="Kanye West">
+                <h2>Исполнил свою мечту</h2>
+                <p>Много лет назад Kanye West говорил, что дизайнерская одежда не должна стоить дорого. Теперь он продает одежду по 20 долларов на сайте Yeezy.com</p>
+            </a>
+
+            <a href="#" class="news-card">
+                <img src="https://via.placeholder.com/400x300" alt="Magdalena Bay">
+                <h2>В лучших традициях 00-х</h2>
+                <p>Дуэт из Лос-Анджелеса Magdalena Bay выпустил синт-поп альбом Imaginal Disk.</p>
+            </a>
+
+            <a href="#" class="news-card">
+                <img src="https://via.placeholder.com/400x300" alt="Yung Lean">
+                <h2>Вечно молодой</h2>
+                <p>Yung Lean выпустил новый клип на трек Forever Yung. В нем снялись его друзья, семья и фанаты.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html> 
