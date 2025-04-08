@@ -11,7 +11,7 @@
             padding: 0;
             line-height: 1.6;
         }
-
+        
         header {
             padding: 20px 50px;
             display: flex;
@@ -87,26 +87,44 @@
 
     <div class="container">
         <h1>Последние новости</h1>
-
-        <div class="news-grid">
-            <a href="#" class="news-card">
-                <img src="https://via.placeholder.com/400x300" alt="Kanye West">
-                <h2>Исполнил свою мечту</h2>
-                <p>Много лет назад Kanye West говорил, что дизайнерская одежда не должна стоить дорого. Теперь он продает одежду по 20 долларов на сайте Yeezy.com</p>
-            </a>
-
-            <a href="#" class="news-card">
-                <img src="https://via.placeholder.com/400x300" alt="Magdalena Bay">
-                <h2>В лучших традициях 00-х</h2>
-                <p>Дуэт из Лос-Анджелеса Magdalena Bay выпустил синт-поп альбом Imaginal Disk.</p>
-            </a>
-
-            <a href="#" class="news-card">
-                <img src="https://via.placeholder.com/400x300" alt="Yung Lean">
-                <h2>Вечно молодой</h2>
-                <p>Yung Lean выпустил новый клип на трек Forever Yung. В нем снялись его друзья, семья и фанаты.</p>
-            </a>
+        
+        <div class="news-grid" id="newsContainer">
+            <!-- Здесь будут отображаться новости -->
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const newsContainer = document.getElementById('newsContainer');
+            
+            fetch('http://localhost:8000/api/preview/')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка сети');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        newsContainer.innerHTML = '<p>Новостей пока нет</p>';
+                        return;
+                    }
+                    
+                    newsContainer.innerHTML = data.map(item => `
+                        <a href="#" class="news-card">
+                            <img src="${item.preview_image || 'https://via.placeholder.com/400x300'}" 
+                                 alt="${item.title}"
+                                 onerror="this.src='https://via.placeholder.com/400x300'">
+                            <h2>${item.title || 'Без заголовка'}</h2>
+                            <p>${item.description || 'Описание отсутствует'}</p>
+                        </a>
+                    `).join('');
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке данных:', error);
+                    newsContainer.innerHTML = '<p>Произошла ошибка при загрузке новостей</p>';
+                });
+        });
+    </script>
 </body>
-</html> 
+</html>
