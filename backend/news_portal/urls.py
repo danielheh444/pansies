@@ -23,11 +23,9 @@ from django.conf.urls.static import static
 from rest_framework import routers
 
 from homepage.views import PreviewApi
-from news.views import ArticleApi
 
 router = routers.DefaultRouter()
 router.register(r'api/preview', PreviewApi)
-router.register(f'api/article', ArticleApi)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -1,22 +1,13 @@
-from django.shortcuts import render
-from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from news.models import Article, ArticleTranslation
-from news.serializers import ArticleSerializer
+from homepage.models import Preview
+from news.models import ArticleTranslation
 from news.translation import translate_text_yandex
-
-
-class ArticleApi(viewsets.ModelViewSet):
-    queryset = Article.objects.all()
-    serializer_class = ArticleSerializer
-    http_method_names = ['get']
-
 
 class TranslateArticleView(APIView):
     def post(self, request, pk):
-        article = Article.objects.get(pk=pk)
+        article = Preview.objects.get(pk=pk)
         target_lang = request.data.get('lang')
         translation = ArticleTranslation.objects.filter(article=article, language=target_lang).first()
         if translation:
