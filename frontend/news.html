@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Новость | MusicNow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        header {
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: black;
+        }
+        nav a {
+            margin-left: 30px;
+            text-decoration: none;
+            color: black;
+            font-size: 18px;
+        }
+        .container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .news-title { font-size: 32px; margin-bottom: 20px; }
+        .news-image { width: 100%; max-height: 400px; object-fit: cover; margin-bottom: 20px; }
+        .news-content { font-size: 18px; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">MusicNow</a>
+        <nav>
+            <a href="/news">Новости</a>
+            <a href="/albums">Альбомы</a>
+            <a href="/clips">Клипы</a>
+        </nav>
+    </header>
+    <div class="container" id="newsDetail">
+        Загрузка...
+    </div>
+    <script>
+        function getIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const newsDetail = document.getElementById('newsDetail');
+            const id = getIdFromUrl();
+            if (!id) {
+                newsDetail.innerHTML = 'Новость не найдена';
+                return;
+            }
+            fetch(`http://localhost:8000/api/news/${id}/`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    return response.json();
+                })
+                .then(item => {
+                    newsDetail.innerHTML = `
+                        <h1 class="news-title">${item.title || 'Без заголовка'}</h1>
+                        <img class="news-image" src="${item.image || 'https://via.placeholder.com/800x400'}" alt="${item.title}">
+                        <p style="color:#666; font-size:16px; margin-bottom:20px;">${item.description || ''}</p>
+                        <div class="news-content">${item.content || 'Нет содержимого'}</div>
+                    `;
+                })
+                .catch(() => {
+                    newsDetail.innerHTML = 'Ошибка при загрузке новости';
+                });
+        });
+    </script>
+</body>
+</html>
