@@ -68,12 +68,17 @@
     </style>
 </head>
 <body>
-    <header>
+    <header style="display: flex; align-items: center;">
+        <select id="globalLanguageSelect" style="margin-right:30px; padding:8px; font-size:16px; border-radius:4px;">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="ja">日本語</option>
+        </select>
         <a href="/" class="logo">MusicNow</a>
         <nav>
-            <a href="/news">Новости</a>
-            <a href="/albums">Альбомы</a>
-            <a href="/clips">Клипы</a>
+            <a href="/">Новости</a>
         </nav>
     </header>
     <div class="container" id="newsDetail">
@@ -105,70 +110,52 @@
             newsDetail.innerHTML = `
                 <h1 class="news-title">${item.title || 'Без заголовка'}</h1>
                 <img class="news-image" src="${item.image || 'https://via.placeholder.com/800x400'}" alt="${item.title}">
-                ${createTranslationControls()}
                 <p style="color:#666; font-size:16px; margin-bottom:20px;">${item.description || ''}</p>
                 <div class="news-content">${item.content || 'Нет содержимого'}</div>
             `;
-
-            // Добавляем обработчик для кнопки перевода
-            const translateBtn = document.getElementById('translateBtn');
-            const languageSelect = document.getElementById('languageSelect');
-            
-            translateBtn.addEventListener('click', async () => {
-                const lang = languageSelect.value;
-                const id = getIdFromUrl();
-                
-                try {
-                    translateBtn.disabled = true;
-                    translateBtn.textContent = 'Переводим...';
-                    
-                    const response = await fetch(`http://localhost:8000/api/translate-article/${id}/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ lang })
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error('Ошибка перевода');
-                    }
-                    
-                    const translatedData = await response.json();
-                    
-                    // Обновляем только текст новости (news-content)
-                    document.querySelector('.news-content').textContent = translatedData.text || 'Нет содержимого';
-                    
-                } catch (error) {
-                    console.error('Ошибка при переводе:', error);
-                    alert('Произошла ошибка при переводе статьи');
-                } finally {
-                    translateBtn.disabled = false;
-                    translateBtn.textContent = 'Перевести';
-                }
-            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const newsDetail = document.getElementById('newsDetail');
             const id = getIdFromUrl();
-            
+            const langSelect = document.getElementById('globalLanguageSelect');
+            // Восстанавливаем язык из localStorage
+            const savedLang = localStorage.getItem('userLang') || 'ru';
+            langSelect.value = savedLang;
+            // Функция для загрузки и перевода новости
+            async function loadAndTranslate(lang) {
+                try {
+                    const response = await fetch(`http://localhost:8000/api/preview/${id}/`);
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    const item = await response.json();
+                    updateContent(item);
+                    if (lang !== 'ru') {
+                        // Переводим только если язык не русский
+                        const translateResp = await fetch(`http://localhost:8000/api/translate-article/${id}/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ lang })
+                        });
+                        if (translateResp.ok) {
+                            const translatedData = await translateResp.json();
+                            document.querySelector('.news-content').textContent = translatedData.text || 'Нет содержимого';
+                        }
+                    }
+                } catch {
+                    newsDetail.innerHTML = 'Ошибка при загрузке новости';
+                }
+            }
             if (!id) {
                 newsDetail.innerHTML = 'Новость не найдена';
                 return;
             }
-            
-            fetch(`http://localhost:8000/api/preview/${id}/`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Ошибка сети');
-                    return response.json();
-                })
-                .then(item => {
-                    updateContent(item);
-                })
-                .catch(() => {
-                    newsDetail.innerHTML = 'Ошибка при загрузке новости';
-                });
+            // При изменении языка
+            langSelect.addEventListener('change', function() {
+                localStorage.setItem('userLang', langSelect.value);
+                loadAndTranslate(langSelect.value);
+            });
+            // При первой загрузке
+            loadAndTranslate(langSelect.value);
         });
     </script>
 </body>
