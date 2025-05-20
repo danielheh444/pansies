@@ -1,8 +1,8 @@
 import requests
 
 
-API_KEY = ""
-folder_id = ""
+API_KEY = "AQVNw4OzQPk_Gcm3Y8jru-tc35RcLOfWlMPYNrVv"
+folder_id = "b1ggclmibj9ido60f67j"
 
 def translate_text_yandex(text, target_language):
     body = {

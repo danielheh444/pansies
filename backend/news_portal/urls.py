@@ -23,12 +23,14 @@ from django.conf.urls.static import static
 from rest_framework import routers
 
 from homepage.views import PreviewApi
+from news.views import TranslateArticleView
 
 router = routers.DefaultRouter()
 router.register(r'api/preview', PreviewApi)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/translate-article/<int:pk>/', TranslateArticleView.as_view(), name = 'translate-article'),
     path('', include(router.urls))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -17,7 +17,7 @@ class TranslateArticleView(APIView):
                 "cached": True
             })
 
-        translated_text = translate_text_yandex(article.text, target_lang)
+        translated_text = translate_text_yandex(article.content, target_lang)
 
         new_translations = ArticleTranslation.objects.create(
             article=article,
