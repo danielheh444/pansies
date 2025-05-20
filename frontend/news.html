@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Новость | MusicNow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        header {
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: black;
+        }
+        nav a {
+            margin-left: 30px;
+            text-decoration: none;
+            color: black;
+            font-size: 18px;
+        }
+        .container { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .news-title { font-size: 32px; margin-bottom: 20px; }
+        .news-image { width: 100%; max-height: 400px; object-fit: cover; margin-bottom: 20px; }
+        .news-content { font-size: 18px; }
+        .translation-controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">MusicNow</a>
+        <nav>
+            <a href="/news">Новости</a>
+            <a href="/albums">Альбомы</a>
+            <a href="/clips">Клипы</a>
+        </nav>
+    </header>
+    <div class="container" id="newsDetail">
+        Загрузка...
+    </div>
+    <script>
+        function getIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        function createTranslationControls() {
+            return `
+                <div class="translation-controls">
+                    <select id="languageSelect">
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="ja">日本語</option>
+                    </select>
+                    <button id="translateBtn">Перевести</button>
+                </div>
+            `;
+        }
+
+        function updateContent(item) {
+            const newsDetail = document.getElementById('newsDetail');
+            newsDetail.innerHTML = `
+                <h1 class="news-title">${item.title || 'Без заголовка'}</h1>
+                <img class="news-image" src="${item.image || 'https://via.placeholder.com/800x400'}" alt="${item.title}">
+                ${createTranslationControls()}
+                <p style="color:#666; font-size:16px; margin-bottom:20px;">${item.description || ''}</p>
+                <div class="news-content">${item.content || 'Нет содержимого'}</div>
+            `;
+
+            // Добавляем обработчик для кнопки перевода
+            const translateBtn = document.getElementById('translateBtn');
+            const languageSelect = document.getElementById('languageSelect');
+            
+            translateBtn.addEventListener('click', async () => {
+                const lang = languageSelect.value;
+                const id = getIdFromUrl();
+                
+                try {
+                    translateBtn.disabled = true;
+                    translateBtn.textContent = 'Переводим...';
+                    
+                    const response = await fetch(`http://localhost:8000/api/translate-article/${id}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ lang })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Ошибка перевода');
+                    }
+                    
+                    const translatedData = await response.json();
+                    
+                    // Обновляем только текст новости (news-content)
+                    document.querySelector('.news-content').textContent = translatedData.text || 'Нет содержимого';
+                    
+                } catch (error) {
+                    console.error('Ошибка при переводе:', error);
+                    alert('Произошла ошибка при переводе статьи');
+                } finally {
+                    translateBtn.disabled = false;
+                    translateBtn.textContent = 'Перевести';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const newsDetail = document.getElementById('newsDetail');
+            const id = getIdFromUrl();
+            
+            if (!id) {
+                newsDetail.innerHTML = 'Новость не найдена';
+                return;
+            }
+            
+            fetch(`http://localhost:8000/api/preview/${id}/`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    return response.json();
+                })
+                .then(item => {
+                    updateContent(item);
+                })
+                .catch(() => {
+                    newsDetail.innerHTML = 'Ошибка при загрузке новости';
+                });
+        });
+    </script>
+</body>
+</html>
