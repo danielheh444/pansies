@@ -109,10 +109,10 @@
                         newsContainer.innerHTML = '<p>Новостей пока нет</p>';
                         return;
                     }
-                    
+
                     newsContainer.innerHTML = data.map(item => `
-                        <a href="#" class="news-card">
-                            <img src="${item.preview_image || 'https://via.placeholder.com/400x300'}" 
+                        <a href="news.html?id=${item.id}" class="news-card">
+                            <img src="${item.preview_image || 'https://via.placeholder.com/400x300'}"
                                  alt="${item.title}"
                                  onerror="this.src='https://via.placeholder.com/400x300'">
                             <h2>${item.title || 'Без заголовка'}</h2>
