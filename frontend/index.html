@@ -76,7 +76,14 @@
     </style>
 </head>
 <body>
-    <header>
+    <header style="display: flex; align-items: center;">
+        <select id="globalLanguageSelect" style="margin-right:30px; padding:8px; font-size:16px; border-radius:4px;">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="ja">日本語</option>
+        </select>
         <a href="/" class="logo">MusicNow</a>
         <nav>
             <a href="/">Новости</a>
@@ -94,34 +101,79 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const newsContainer = document.getElementById('newsContainer');
-            
-            fetch('http://localhost:8000/api/preview/')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Ошибка сети');
-                    }
-                    return response.json();
-                })
-                .then(data => {
+            const langSelect = document.getElementById('globalLanguageSelect');
+            // Восстанавливаем язык из localStorage
+            const savedLang = localStorage.getItem('userLang') || 'ru';
+            langSelect.value = savedLang;
+            // Функция для загрузки и перевода новостей
+            async function loadAndTranslateNews(lang) {
+                try {
+                    const response = await fetch('http://localhost:8000/api/preview/');
+                    if (!response.ok) throw new Error('Ошибка сети');
+                    const data = await response.json();
                     if (!data || data.length === 0) {
                         newsContainer.innerHTML = '<p>Новостей пока нет</p>';
                         return;
                     }
-
-                    newsContainer.innerHTML = data.map(item => `
-                        <a href="news.html?id=${item.id}" class="news-card">
-                            <img src="${item.preview_image || 'https://via.placeholder.com/400x300'}"
-                                 alt="${item.title}"
-                                 onerror="this.src='https://via.placeholder.com/400x300'">
-                            <h2>${item.title || 'Без заголовка'}</h2>
-                            <p>${item.description || 'Описание отсутствует'}</p>
-                        </a>
-                    `).join('');
-                })
-                .catch(error => {
+                    // Если язык русский, просто отображаем оригинал
+                    if (lang === 'ru') {
+                        newsContainer.innerHTML = data.map(item => `
+                            <a href="news.html?id=${item.id}&lang=ru" class="news-card">
+                                <img src="${item.preview_image || 'https://via.placeholder.com/400x300'}"
+                                     alt="${item.title}"
+                                     onerror="this.src='https://via.placeholder.com/400x300'">
+                                <h2>${item.title || 'Без заголовка'}</h2>
+                                <p>${item.description || 'Описание отсутствует'}</p>
+                            </a>
+                        `).join('');
+                    } else {
+                        // Для каждого id делаем запрос на перевод
+                        const translatedNews = await Promise.all(data.map(async item => {
+                            try {
+                                const resp = await fetch(`http://localhost:8000/api/translate-article/${item.id}/`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ lang })
+                                });
+                                if (resp.ok) {
+                                    const t = await resp.json();
+                                    return {
+                                        id: item.id,
+                                        preview_image: item.preview_image,
+                                        title: t.title || 'Нет содержимого',
+                                        description: t.description || 'Нет содержимого',
+                                    };
+                                }
+                            } catch {}
+                            return {
+                                id: item.id,
+                                preview_image: item.preview_image,
+                                title: 'Нет содержимого',
+                                description: 'Нет содержимого',
+                            };
+                        }));
+                        newsContainer.innerHTML = translatedNews.map(item => `
+                            <a href="news.html?id=${item.id}&lang=${lang}" class="news-card">
+                                <img src="${item.preview_image || 'https://via.placeholder.com/400x300'}"
+                                     alt="${item.title}"
+                                     onerror="this.src='https://via.placeholder.com/400x300'">
+                                <h2>${item.title}</h2>
+                                <p>${item.description}</p>
+                            </a>
+                        `).join('');
+                    }
+                } catch (error) {
                     console.error('Ошибка при загрузке данных:', error);
                     newsContainer.innerHTML = '<p>Произошла ошибка при загрузке новостей</p>';
-                });
+                }
+            }
+            // При изменении языка
+            langSelect.addEventListener('change', function() {
+                localStorage.setItem('userLang', langSelect.value);
+                loadAndTranslateNews(langSelect.value);
+            });
+            // При первой загрузке
+            loadAndTranslateNews(langSelect.value);
         });
     </script>
 </body>
