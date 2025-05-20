@@ -138,7 +138,9 @@
                         });
                         if (translateResp.ok) {
                             const translatedData = await translateResp.json();
-                            document.querySelector('.news-content').textContent = translatedData.text || 'Нет содержимого';
+                            document.querySelector('.news-title').textContent = translatedData.title || 'Нет содержимого';
+                            document.querySelector('p[style*="color:#666"]').textContent = translatedData.description || 'Нет содержимого';
+                            document.querySelector('.news-content').textContent = translatedData.content || 'Нет содержимого';
                         }
                     }
                 } catch {
