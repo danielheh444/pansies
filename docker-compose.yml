@@ -2,7 +2,7 @@ services:
   django-web:
     build:
       context: ./backend
-      dockerfile: Dockerfile_1
+      dockerfile: Dockerfile
     container_name: django-docker
     command: bash -c "python manage.py migrate --noinput &&
              python manage.py runserver 0.0.0.0:8000"
@@ -19,6 +19,9 @@ services:
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_PORT: ${DATABASE_PORT}
+      YANDEX_API_KEY: ${YANDEX_API_KEY}
+      YANDEX_FOLDER_ID: ${YANDEX_FOLDER_ID}
+
     env_file:
       - .env
 

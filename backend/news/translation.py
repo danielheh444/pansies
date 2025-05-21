@@ -1,8 +1,8 @@
 import requests
+import os
 
-
-API_KEY = "AQVNw4OzQPk_Gcm3Y8jru-tc35RcLOfWlMPYNrVv"
-folder_id = "b1ggclmibj9ido60f67j"
+API_KEY = os.getenv("YANDEX_API_KEY")
+folder_id = os.getenv("YANDEX_FOLDER_ID")
 
 def translate_text_yandex(text, target_language):
     body = {
